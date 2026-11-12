@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surtifácil</title>
+  <link rel="icon" href="https://emojis.wiki/demos/emojis/shopping-cart.webp">
+  <link rel="apple-touch-icon" href="https://emojis.wiki/demos/emojis/shopping-cart.webp">
+  <meta name="theme-color" content="#1e40af">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: #f3f4f6; color: #1f2937; padding: 12px; padding-bottom: 55px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    
+    #splash-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+      color: white; display: flex; flex-direction: column; justify-content: center; align-items: center;
+      z-index: 9999; transition: opacity 0.5s ease, visibility 0.5s;
+    }
+    .splash-logo {
+      width: 130px; height: 130px; background: white; border-radius: 28px;
+      display: flex; justify-content: center; align-items: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3); margin-bottom: 20px; font-size: 3rem;
+    }
+    .splash-title { font-size: 2rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; }
+    .splash-subtitle { font-size: 0.95rem; color: #93c5fd; margin-bottom: 25px; font-weight: 500; }
+    .splash-credits { font-size: 0.8rem; color: #cbd5e1; text-align: center; position: absolute; bottom: 25px; }
+    
+    header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; background-color: #1e40af; color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    h1 { font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; }
+    @media (min-width: 768px) { .btn-group { width: auto; } }
+    
+    .btn { background-color: #2563eb; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; flex: 1; text-align: center; }
+    .btn:hover { background-color: #1d4ed8; }
+    .btn-green { background-color: #16a34a; } .btn-green:hover { background-color: #15803d; }
+    .btn-orange { background-color: #ea580c; } .btn-orange:hover { background-color: #c2410c; }
+    .btn-red { background-color: #dc2626; } .btn-red:hover { background-color: #b91c1c; }
+    .btn-secondary { background-color: #4b5563; }
+    .btn-purple { background-color: #7c3aed; } .btn-purple:hover { background-color: #6d28d9; }
+    .btn-teal { background-color: #0d9488; } .btn-teal:hover { background-color: #0f766e; }
+    .btn-yellow { background-color: #d97706; color: white; } .btn-yellow:hover { background-color: #b45309; }
+    .btn-sm { padding: 8px 12px; font-size: 0.8rem; flex: none; }
+    
+    .container { flex: 1; display: grid; grid-template-columns: 1fr; gap: 12px; overflow: hidden; }
+    @media (min-width: 768px) { .container-twocol { grid-template-columns: 2fr 1fr; } }
+    
+    .card { background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; }
+    .search-bar { width: 100%; padding: 10px 12px; font-size: 0.95rem; border: 2px solid #cbd5e1; border-radius: 8px; margin-bottom: 12px; flex-shrink: 0; }
+    
+    #lista-catalogo { flex: 1; overflow-y: auto; padding-right: 4px; }
+    #lista-faltantes-resumen { flex: 1; overflow-y: auto; padding-right: 4px; margin-top: 8px; }
+    
+    .prod-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #e2e8f0; gap: 8px; }
+    .prod-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .prod-name { font-weight: bold; font-size: 0.95rem; word-break: break-word; }
+    .prod-sub { font-size: 0.8rem; color: #64748b; }
+    .badge-cat { background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-left: 4px; }
+    
+    .badge-no-prov { background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; display: inline-block; margin-top: 3px; }
+    
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; padding: 12px; z-index: 100; }
+    .modal-content { background: white; padding: 16px; border-radius: 14px; max-width: 450px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    
+    .color-multi-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; max-height: 280px; overflow-y: auto; }
+    .color-item-check { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 8px; gap: 8px; }
+    .color-item-check input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+    .color-item-check input[type="number"] { width: 65px; padding: 6px; font-size: 0.95rem; text-align: center; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: bold; }
+
+    .tabs-calle-mobile { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; -webkit-overflow-scrolling: touch; flex-shrink: 0; }
+    .tabs-calle-mobile::-webkit-scrollbar { display: none; }
+    .tab-mobile { padding: 10px 14px; background: #e2e8f0; border-radius: 10px; cursor: pointer; white-space: nowrap; font-weight: bold; font-size: 0.85rem; color: #334155; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .tab-mobile.active { background: #2563eb; color: white; box-shadow: 0 3px 6px rgba(37,99,235,0.3); }
+    .tab-mobile.tab-red.active { background: #dc2626; color: white; box-shadow: 0 3px 6px rgba(220,38,38,0.3); }
+
+    #lista-compras-proveedor { flex: 1; overflow-y: auto; padding-right: 4px; }
+    .calle-prod-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); gap: 10px; }
+    
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 0.85rem; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .checkbox-group { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
+    .checkbox-group input { width: 18px; height: 18px; }
+
+    .prov-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; }
+    
+    .multi-bar { background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
+
+    .file-btn-group { display: flex; gap: 6px; margin-top: 6px; margin-bottom: 8px; flex-shrink: 0; }
+    .file-btn { font-size: 0.75rem; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; color: white; flex: 1; text-align: center; }
+    .file-export { background-color: #16a34a; } .file-export:hover { background-color: #15803d; }
+    .file-import { background-color: #2563eb; } .file-import:hover { background-color: #1d4ed8; }
+
+    .banner-notas-calle {
+      background: #fef3c7; border: 1px solid #f59e0b; color: #92400e;
+      padding: 12px; border-radius: 10px; margin-bottom: 12px; font-size: 0.9rem;
+      white-space: pre-wrap; word-break: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    footer {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: #1e293b; color: #94a3b8; text-align: center; padding: 8px 15px; font-size: 0.75rem;
+      border-top: 1px solid #334155; z-index: 10; display: flex; justify-content: space-between; align-items: center;
+    }
+    footer strong { color: #f8fafc; }
+    .btn-reset-micro { background: #334155; color: #94a3b8; border: 1px solid #475569; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; cursor: pointer; }
+    .btn-reset-micro:hover { background: #dc2626; color: white; border-color: #dc2626; }
+  </style>
+</head>
+<body>
+
+  <div id="splash-screen">
+    <div class="splash-logo">🛒</div>
+    <div class="splash-title">SURTIFÁCIL</div>
+    <div class="splash-subtitle">Sistema Offline 100% Local (.TXT)</div>
+    <div class="splash-credits">
+      Desarrollado y Creado por<br>
+      <strong>Carlos Diego Aguilar Baeza</strong>
+    </div>
+  </div>
+
+  <header>
+    <h1 id="app-title">🛒 Surtifácil - Modo Tienda</h1>
+    <div class="btn-group">
+      <button class="btn btn-teal btn-sm" onclick="abrirModalCategorias()">🏷️ Categorías</button>
+      <button class="btn btn-purple btn-sm" onclick="abrirModalProveedores()">🏢 Proveedores</button>
+      <button class="btn btn-yellow btn-sm" onclick="abrirModalNotasGenerales()">📝 Notas Generales</button>
+      <button class="btn btn-secondary btn-sm" onclick="abrirModalNuevoProducto()">➕ Nuevo</button>
+      <button class="btn btn-green" id="btn-toggle-mode" onclick="toggleModo()">📱 Cambiar a Modo Calle</button>
+    </div>
+  </header>
+
+  <div id="modo-tienda" class="container container-twocol">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-shrink:0;">
+        <h2>Catálogo</h2>
+      </div>
+      
+      <div style="display:flex; gap:8px; margin-bottom:12px; flex-shrink:0;">
+        <input type="text" id="input-buscar" class="search-bar" style="margin-bottom:0; flex:2;" placeholder="🔍 Buscar producto..." oninput="filtrarProductos()">
+        <select id="select-filtro-cat" class="search-bar" style="margin-bottom:0; flex:1;" onchange="filtrarProductos()">
+          <option value="">Todas</option>
+        </select>
+      </div>
+
+      <div id="bar-multi-productos" class="multi-bar" style="display: none;">
+        <span><strong id="count-multi-prods">0</strong> seleccionados</span>
+        <button class="btn btn-green btn-sm" onclick="procesarMultiplesFaltantesConCola()">📥 Procesar</button>
+      </div>
+
+      <div id="lista-catalogo"></div>
+    </div>
+
+    <div class="card" style="position: relative;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-shrink:0;">
+        <h2 style="margin:0;">📋 Faltantes</h2>
+      </div>
+
+      <div class="file-btn-group">
+        <button class="file-btn file-export" onclick="exportarArchivoSurtidoTxt()">📤 Exportar (.txt)</button>
+        <button class="file-btn file-import" onclick="document.getElementById('input-file-txt').click()">📥 Importar</button>
+        <input type="file" id="input-file-txt" accept=".txt,.json" style="display:none;" onchange="importarArchivoSurtidoTxt(event)">
+      </div>
+
+      <div id="lista-faltantes-resumen"></div>
+    </div>
+  </div>
+
+  <div id="modo-calle" class="card" style="display: none; flex: 1; overflow: hidden;">
+    <div id="contenedor-notas-calle"></div>
+    <div class="tabs-calle-mobile" id="tabs-proveedores"></div>
+    <div id="lista-compras-proveedor"></div>
+  </div>
+
+  <!-- MODAL DE NOTAS GENERALES -->
+  <div id="modal-notas-generales" class="modal">
+    <div class="modal-content">
+      <h3>📝 Notas e Instrucciones Generales</h3>
+      <div class="form-group" style="margin-top: 10px;">
+        <textarea id="input-notas-generales" placeholder="Escribe tus notas de ruta aquí..."></textarea>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn btn-green" style="flex:1" onclick="guardarNotasGenerales()">Guardar Nota</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="cerrarModalNotasGenerales()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE SELECCIÓN DE COLOR MULTIPLE -->
+  <div id="modal-color-multi" class="modal">
+    <div class="modal-content">
+      <h3>🎨 Selecciona Colores y Cantidades</h3>
+      <p id="modal-prod-nombre-multi" style="color: #64748b; margin-top:4px; font-weight:bold;"></p>
+      <div class="color-multi-list" id="grid-colores-multi"></div>
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button class="btn btn-green" style="flex:1" onclick="confirmarColoresIndividuales()">+ Guardar Faltantes</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="omitirProductoEnCola()">Saltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CATEGORÍAS -->
+  <div id="modal-categorias" class="modal">
+    <div class="modal-content">
+      <h3>🏷️ Administrar Categorías</h3>
+      <div class="form-group" style="display:flex; gap:8px; margin-top:10px;">
+        <input type="text" id="input-nueva-cat" placeholder="Nombre (ej. Escolar)">
+        <button class="btn btn-green btn-sm" onclick="agregarCategoriaDirecto()">+ Agregar</button>
+      </div>
+      <h4 style="margin: 15px 0 10px 0;">Registradas:</h4>
+      <div id="lista-gestion-categorias"></div>
+      <button class="btn btn-secondary" style="width:100%; margin-top:15px;" onclick="cerrarModalCategorias()">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE EDITAR PRODUCTO -->
+  <div id="modal-editar-producto" class="modal">
+    <div class="modal-content">
+      <h3>✏️ Editar Producto</h3>
+      <div class="form-group" style="margin-top:10px;">
+        <label>Nombre del Producto</label>
+        <input type="text" id="edit-prod-nombre">
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <select id="edit-prod-cat"></select>
+      </div>
+      <div class="form-group">
+        <label>Proveedor Principal</label>
+        <select id="edit-prod-prov"></select>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="edit-prod-has-color" onchange="toggleEditColorInput(this.checked)">
+        <label for="edit-prod-has-color">¿Maneja colores / variantes?</label>
+      </div>
+      <div class="form-group" id="edit-group-colores" style="display:none;">
+        <label>Colores (separados por coma)</label>
+        <input type="text" id="edit-prod-colores" placeholder="Rojo, Azul, Verde, Negro">
+      </div>
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button class="btn btn-green" style="flex:1" onclick="guardarEdicionProducto()">Guardar</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="cerrarModalEditarProducto()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE PROVEEDORES -->
+  <div id="modal-proveedores" class="modal">
+    <div class="modal-content">
+      <h3>🏢 Administrar Proveedores</h3>
+      <div class="form-group" style="display:flex; gap:8px; margin-top:10px;">
+        <input type="text" id="input-nuevo-prov" placeholder="Nombre del proveedor">
+        <button class="btn btn-green btn-sm" onclick="agregarProveedorDirecto()">+ Agregar</button>
+      </div>
+      <h4 style="margin: 15px 0 10px 0;">Registrados:</h4>
+      <div id="lista-gestion-proveedores"></div>
+      <button class="btn btn-secondary" style="width:100%; margin-top:15px;" onclick="cerrarModalProveedores()">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE ACCIÓN CALLE -->
+  <div id="modal-accion-calle" class="modal">
+    <div class="modal-content">
+      <h3 id="calle-prod-nombre"></h3>
+      <p style="margin: 10px 0; color: #64748b;">¿Qué acción deseas realizar?</p>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn btn-green" onclick="confirmarCompra()">✅ Sí lo compré</button>
+        <button class="btn btn-orange" onclick="abrirReasignacion()">➡️ Asignar a otro proveedor...</button>
+        <button class="btn btn-red" onclick="confirmarNoConseguido()">❌ No conseguido</button>
+        <button class="btn btn-secondary" onclick="cerrarModalCalle()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL REASIGNAR -->
+  <div id="modal-reasignar" class="modal">
+    <div class="modal-content">
+      <h3>Selecciona el proveedor</h3>
+      <div id="lista-proveedores-reasignar" style="display:flex; flex-direction:column; gap:10px; margin: 15px 0;"></div>
+      <button class="btn btn-secondary" style="width:100%" onclick="cerrarModalReasignar()">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- MODAL NUEVO PRODUCTO -->
+  <div id="modal-nuevo-producto" class="modal">
+    <div class="modal-content">
+      <h3>➕ Nuevo Producto</h3>
+      <div class="form-group" style="margin-top:10px;">
+        <label>Nombre</label>
+        <input type="text" id="nuevo-nombre" placeholder="ej. Audífonos Inalámbricos">
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <select id="nuevo-cat"></select>
+      </div>
+      <div class="form-group">
+        <label>Proveedor Principal</label>
+        <select id="nuevo-prov"></select>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="nuevo-has-color" onchange="toggleColorInput(this.checked)">
+        <label for="nuevo-has-color">¿Maneja colores / variantes?</label>
+      </div>
+      <div class="form-group" id="group-colores" style="display:none;">
+        <label>Colores (separados por coma)</label>
+        <input type="text" id="nuevo-colores" placeholder="Negro, Blanco, Azul, Rojo">
+      </div>
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button class="btn btn-green" style="flex:1" onclick="guardarNuevoProducto()">Guardar</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="cerrarModalNuevoProducto()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <button class="btn-reset-micro" onclick="restablecerFabricaDobleConfirmacion()" title="Borrar todo y vaciar memoria">⚠️ Borrar Todo</button>
+    <span>Surtifácil • Creado por <strong>Carlos Diego Aguilar Baeza</strong></span>
+  </footer>
+
+  <script>
+    const SIN_PROVEEDOR_KEY = "⚠️ SIN PROVEEDOR (Por buscar)";
+
+    let proveedores = ["Proveedor 1 (Mesones)", "Proveedor 2 (Eje Central)"];
+    let categorias = ["General", "Escolar", "Oficina"];
+    let catalogo = [];
+    let faltantes = [];
+    let notasGenerales = "";
+    let seleccionMultiProds = new Set();
+    let colaProductosConColor = [];
+    let modoActual = 'tienda';
+    let prodSeleccionadoTemp = null;
+    let prodEditingTemp = null;
+    let provCalleActual = SIN_PROVEEDOR_KEY;
+
+    function init() {
+      const ocultarSplash = () => {
+        const splash = document.getElementById('splash-screen');
+        if (splash && splash.style.display !== 'none') {
+          splash.style.opacity = '0';
+          setTimeout(() => splash.style.display = 'none', 500);
+        }
+      };
+
+      setTimeout(ocultarSplash, 800);
+
+      try {
+        cargarDatosLocales();
+      } catch (err) {
+        console.error("Error al inicializar datos:", err);
+        ocultarSplash();
+      }
+    }
+
+    function cargarDatosLocales() {
+      try {
+        const localProv = localStorage.getItem('surtifacil_provs');
+        if(localProv) {
+          proveedores = JSON.parse(localProv).sort((a,b) => a.localeCompare(b));
+        } else {
+          proveedores = ["Proveedor 1 (Mesones)", "Proveedor 2 (Eje Central)"];
+          localStorage.setItem('surtifacil_provs', JSON.stringify(proveedores));
+        }
+      } catch(e) { localStorage.removeItem('surtifacil_provs'); }
+
+      try {
+        const localCat = localStorage.getItem('surtifacil_cats');
+        if(localCat) {
+          categorias = JSON.parse(localCat).sort((a,b) => a.localeCompare(b));
+        } else {
+          categorias = ["General", "Escolar", "Oficina"];
+          localStorage.setItem('surtifacil_cats', JSON.stringify(categorias));
+        }
+      } catch(e) { localStorage.removeItem('surtifacil_cats'); }
+
+      try {
+        const localNotas = localStorage.getItem('surtifacil_notas_gral');
+        if(localNotas !== null) notasGenerales = localNotas;
+      } catch(e) { localStorage.removeItem('surtifacil_notas_gral'); }
+
+      try {
+        const localProd = localStorage.getItem('surtifacil_catalogo');
+        if(localProd) {
+          catalogo = JSON.parse(localProd).sort((a,b) => a.nombre.localeCompare(b.nombre));
+        } else {
+          catalogo = [];
+          localStorage.setItem('surtifacil_catalogo', JSON.stringify(catalogo));
+        }
+      } catch(e) { localStorage.removeItem('surtifacil_catalogo'); }
+
+      try {
+        const localFaltantes = localStorage.getItem('surtifacil_faltantes');
+        if(localFaltantes) faltantes = JSON.parse(localFaltantes);
+      } catch(e) { localStorage.removeItem('surtifacil_faltantes'); }
+
+      poblarSelectsCategorias();
+      poblarSelectProveedores();
+      renderCatalogo();
+      renderFaltantesResumen();
+      if(modoActual === 'calle') renderModoCalle();
+    }
+
+    function restablecerFabricaDobleConfirmacion() {
+      const paso1 = confirm("⚠️ ADVERTENCIA: Estás a punto de borrar absolutamente todo el catálogo, faltantes y configuraciones. ¿Deseas continuar?");
+      if(!paso1) return;
+
+      const codigoSeguridad = "BORRAR";
+      const paso2 = prompt(`⚠️ DOBLE CONFIRMACIÓN DE SEGURIDAD:\n\nPara confirmar el borrado total de la memoria, escribe la palabra exactamente en mayúsculas: "${codigoSeguridad}"`);
+      
+      if(paso2 === codigoSeguridad) {
+        localStorage.clear();
+        catalogo = [];
+        faltantes = [];
+        proveedores = ["Proveedor 1 (Mesones)", "Proveedor 2 (Eje Central)"];
+        categorias = ["General", "Escolar", "Oficina"];
+        notasGenerales = "";
+        
+        localStorage.setItem('surtifacil_catalogo', JSON.stringify(catalogo));
+        localStorage.setItem('surtifacil_faltantes', JSON.stringify(faltantes));
+        localStorage.setItem('surtifacil_provs', JSON.stringify(proveedores));
+        localStorage.setItem('surtifacil_cats', JSON.stringify(categorias));
+        localStorage.setItem('surtifacil_notas_gral', notasGenerales);
+        
+        cargarDatosLocales();
+        alert("✅ ¡Memoria restablecida de fábrica por completo!");
+      } else {
+        alert("❌ Operación cancelada. El código ingresado no coincide.");
+      }
+    }
+
+    function exportarArchivoSurtidoTxt() {
+      const datosSurtido = {
+        version: "2.1",
+        fecha: new Date().toISOString(),
+        proveedores: proveedores,
+        categorias: categorias,
+        catalogo: catalogo,
+        faltantes: faltantes,
+        notasGenerales: notasGenerales
+      };
+
+      const jsonStr = JSON.stringify(datosSurtido, null, 2);
+      const blob = new Blob([jsonStr], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      
+      const fechaFormato = new Date().toISOString().slice(0,10);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `surtifacil_respaldo_${fechaFormato}.txt`;
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importarArchivoSurtidoTxt(event) {
+      const archivo = event.target.files[0];
+      if(!archivo) return;
+
+      const lector = new FileReader();
+      lector.onload = function(e) {
+        try {
+          const contenido = JSON.parse(e.target.result);
+          if(!contenido.faltantes || !contenido.catalogo) {
+            alert("❌ El archivo seleccionado no tiene el formato válido de Surtifácil.");
+            return;
+          }
+
+          if(confirm("¿Deseas fusionar/importar este archivo? Se actualizarán catálogos, proveedores, notas y faltantes.")) {
+            const setProvs = new Set([...proveedores, ...(contenido.proveedores || [])]);
+            proveedores = Array.from(setProvs).sort((a,b) => a.localeCompare(b));
+
+            const setCats = new Set([...categorias, ...(contenido.categorias || [])]);
+            categorias = Array.from(setCats).sort((a,b) => a.localeCompare(b));
+
+            if(contenido.notasGenerales !== undefined) {
+              notasGenerales = contenido.notasGenerales;
+            }
+
+            contenido.catalogo.forEach(prodImp => {
+              const prodExistente = catalogo.find(p => p.id === prodImp.id || p.nombre.toLowerCase() === prodImp.nombre.toLowerCase());
+              if(prodExistente) {
+                prodExistente.cat = prodImp.cat;
+                prodExistente.prov = prodImp.prov;
+                prodExistente.tieneColor = prodImp.tieneColor;
+                prodExistente.colores = prodImp.colores;
+              } else {
+                catalogo.push(prodImp);
+              }
+            });
+            catalogo.sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+            contenido.faltantes.forEach(itemImportado => {
+              const existeLocal = faltantes.find(f => f.idFaltante === itemImportado.idFaltante || (f.idProductoOriginal === itemImportado.idProductoOriginal && f.color === itemImportado.color && f.estado === 'pendiente'));
+
+              if(existeLocal) {
+                existeLocal.cantidad += itemImportado.cantidad;
+                existeLocal.estado = itemImportado.estado;
+              } else {
+                faltantes.push(itemImportado);
+              }
+            });
+
+            localStorage.setItem('surtifacil_provs', JSON.stringify(proveedores));
+            localStorage.setItem('surtifacil_cats', JSON.stringify(categorias));
+            localStorage.setItem('surtifacil_notas_gral', notasGenerales);
+            localStorage.setItem('surtifacil_catalogo', JSON.stringify(catalogo));
+            localStorage.setItem('surtifacil_faltantes', JSON.stringify(faltantes));
+
+            cargarDatosLocales();
+            alert("✅ ¡Archivo importado y sincronizado perfectamente!");
+          }
+        } catch(err) {
+          alert("❌ Error al leer el archivo. Asegúrate de que sea un respaldo válido de Surtifácil.");
+        }
+        event.target.value = "";
+      };
+      lector.readAsText(archivo);
+    }
+
+    function abrirModalNotasGenerales() {
+      document.getElementById('input-notas-generales').value = notasGenerales;
+      document.getElementById('modal-notas-generales').style.display = 'flex';
+    }
+
+    function cerrarModalNotasGenerales() {
+      document.getElementById('modal-notas-generales').style.display = 'none';
+    }
+
+    function guardarNotasGenerales() {
+      notasGenerales = document.getElementById('input-notas-generales').value.trim();
+      localStorage.setItem('surtifacil_notas_gral', notasGenerales);
+      cerrarModalNotasGenerales();
+      alert("✅ Notas generales guardadas con éxito.");
+    }
+
+    function toggleModo() {
+      if(modoActual === 'tienda') {
+        modoActual = 'calle';
+        document.getElementById('modo-tienda').style.display = 'none';
+        document.getElementById('modo-calle').style.display = 'flex';
+        document.getElementById('app-title').innerText = '📱 Surtifácil - Modo Calle';
+        document.getElementById('btn-toggle-mode').innerText = '🏬 Cambiar a Modo Tienda';
+        renderModoCalle();
+      } else {
+        modoActual = 'tienda';
+        document.getElementById('modo-tienda').style.display = 'grid';
+        document.getElementById('modo-calle').style.display = 'none';
+        document.getElementById('app-title').innerText = '🛒 Surtifácil - Modo Tienda';
+        document.getElementById('btn-toggle-mode').innerText = '📱 Cambiar a Modo Calle';
+        renderFaltantesResumen();
+      }
+    }
+
+    function renderCatalogo() {
+      const filtroTexto = document.getElementById('input-buscar').value.toLowerCase();
+      const filtroCat = document.getElementById('select-filtro-cat').value;
+      const cont = document.getElementById('lista-catalogo');
+      cont.innerHTML = "";
+
+      const prods = catalogo.filter(p => {
+        const coincideTexto = p.nombre.toLowerCase().includes(filtroTexto);
+        const coincideCat = filtroCat === "" || (p.cat || "General") === filtroCat;
+        return coincideTexto && coincideCat;
+      }).sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+      if(prods.length === 0) {
+        cont.innerHTML = "<p style='color:#64748b; font-size:0.9rem; padding:15px; text-align:center;'>No hay productos registrados en el catálogo.</p>";
+        actualizarBarraMultiProds();
+        return;
+      }
+
+      prods.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'prod-item';
+        const esSinProv = p.prov === SIN_PROVEEDOR_KEY;
+        const estaChecked = seleccionMultiProds.has(p.id);
+
+        div.innerHTML = `
+          <div class="prod-left">
+            <input type="checkbox" style="width:20px; height:20px; cursor:pointer;" ${estaChecked ? 'checked' : ''} onchange="toggleSelectProducto(${p.id}, this.checked)">
+            <div>
+              <div class="prod-name">${p.nombre} <span class="badge-cat">${p.cat || 'General'}</span></div>
+              <div class="prod-sub">
+                ${esSinProv ? '<span class="badge-no-prov">⚠️ SIN PROVEEDOR</span>' : 'Principal: ' + p.prov}
+                ${p.tieneColor ? `• 🎨 <strong>[${p.colores.join(', ')}]</strong>` : ''}
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-secondary btn-sm" onclick="abrirModalEditarProducto(${p.id})">✏️</button>
+            <button class="btn btn-red btn-sm" onclick="eliminarProducto(${p.id})">🗑️</button>
+            <button class="btn btn-sm" onclick="iniciarAgregarFaltante(${p.id})">+ Marcar</button>
+          </div>
+        `;
+        cont.appendChild(div);
+      });
+      actualizarBarraMultiProds();
+    }
+
+    function eliminarProducto(id) {
+      const prod = catalogo.find(p => p.id === id);
+      if(!prod) return;
+      if(confirm(`¿Deseas eliminar "${prod.nombre}" del catálogo?`)) {
+        catalogo = catalogo.filter(p => p.id !== id);
+        localStorage.setItem('surtifacil_catalogo', JSON.stringify(catalogo));
+        seleccionMultiProds.delete(id);
+        renderCatalogo();
+        renderFaltantesResumen();
+      }
+    }
+
+    function toggleSelectProducto(id, isChecked) {
+      if(isChecked) seleccionMultiProds.add(id);
+      else seleccionMultiProds.delete(id);
+      actualizarBarraMultiProds();
+    }
+
+    function actualizarBarraMultiProds() {
+      const bar = document.getElementById('bar-multi-productos');
+      const countLabel = document.getElementById('count-multi-prods');
+      if(seleccionMultiProds.size > 0) {
+        bar.style.display = 'flex';
+        countLabel.innerText = seleccionMultiProds.size;
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+
+    function procesarMultiplesFaltantesConCola() {
+      colaProductosConColor = [];
+      seleccionMultiProds.forEach(id => {
+        const prod = catalogo.find(p => p.id === id);
+        if(prod) {
+          if(prod.tieneColor) colaProductosConColor.push(prod);
+          else {
+            const cantStr = prompt(`Cantidad a pedir de "${prod.nombre}":`, "1");
+            if(cantStr !== null) agregarFaltanteDirecto(prod, null, parseInt(cantStr) || 1);
+          }
+        }
+      });
+      seleccionMultiProds.clear();
+      renderCatalogo();
+      renderFaltantesResumen();
+      if(colaProductosConColor.length > 0) procesarSiguienteEnCola();
+    }
+
+    function procesarSiguienteEnCola() {
+      if(colaProductosConColor.length === 0) {
+        cerrarModalColorMulti();
+        return;
+      }
+      prodSeleccionadoTemp = colaProductosConColor.shift();
+      document.getElementById('modal-prod-nombre-multi').innerText = prodSeleccionadoTemp.nombre;
+      const grid = document.getElementById('grid-colores-multi');
+      grid.innerHTML = "";
+      prodSeleccionadoTemp.colores.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'color-item-check';
+        item.innerHTML = `
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" class="check-color-sel" data-color="${c}" onchange="toggleInputCantidadColor(this)">
+            <span style="font-weight:bold;">${c}</span>
+          </div>
+          <input type="number" value="1" min="1" class="input-cant-color" data-color="${c}" style="display:none;" disabled>
+        `;
+        grid.appendChild(item);
+      });
+      document.getElementById('modal-color-multi').style.display = 'flex';
+    }
+
+    function toggleInputCantidadColor(checkbox) {
+      const row = checkbox.closest('.color-item-check');
+      const inputNum = row.querySelector('.input-cant-color');
+      if(checkbox.checked) {
+        inputNum.style.display = 'block';
+        inputNum.disabled = false;
+        inputNum.value = "1";
+      } else {
+        inputNum.style.display = 'none';
+        inputNum.disabled = true;
+        inputNum.value = "1";
+      }
+    }
+
+    function omitirProductoEnCola() { procesarSiguienteEnCola(); }
+    function filtrarProductos() { renderCatalogo(); }
+
+    function iniciarAgregarFaltante(id) {
+      const prod = catalogo.find(p => p.id === id);
+      if(prod) {
+        if(prod.tieneColor) {
+          colaProductosConColor = [prod];
+          procesarSiguienteEnCola();
+        } else {
+          const cantStr = prompt(`Cantidad a pedir de "${prod.nombre}":`, "1");
+          if(cantStr !== null) agregarFaltanteDirecto(prod, null, parseInt(cantStr) || 1);
+        }
+      }
+    }
+
+    function confirmarColoresIndividuales() {
+      const checks = document.querySelectorAll('.check-color-sel:checked');
+      if(checks.length === 0) { alert("Selecciona al menos un color o dale a 'Saltar'."); return; }
+      checks.forEach(chk => {
+        const row = chk.closest('.color-item-check');
+        const colorName = chk.getAttribute('data-color');
+        const cantidad = parseInt(row.querySelector('.input-cant-color').value) || 1;
+        agregarFaltanteDirecto(prodSeleccionadoTemp, colorName, cantidad);
+      });
+      procesarSiguienteEnCola();
+    }
+
+    function cerrarModalColorMulti() {
+      document.getElementById('modal-color-multi').style.display = 'none';
+      prodSeleccionadoTemp = null;
+      colaProductosConColor = [];
+    }
+
+    function agregarFaltanteDirecto(prod, color, cantidadAdicional) {
+      let existente = faltantes.find(f => f.idProductoOriginal === prod.id && f.color === (color || null) && f.estado === 'pendiente');
+      if(existente) {
+        existente.cantidad += cantidadAdicional;
+      } else {
+        const nuevoFaltante = {
+          idFaltante: 'f_' + Date.now() + Math.random().toString(36).substr(2, 5),
+          idProductoOriginal: prod.id,
+          nombre: prod.nombre,
+          provOriginal: prod.prov,
+          provActual: prod.prov,
+          color: color,
+          cantidad: cantidadAdicional,
+          estado: 'pendiente'
+        };
+        faltantes.push(nuevoFaltante);
+      }
+      localStorage.setItem('surtifacil_faltantes', JSON.stringify(faltantes));
+      renderFaltantesResumen();
+      if(modoActual === 'calle') renderModoCalle();
+    }
+
+    function eliminarFaltanteResumen(idFaltante) {
+      if(!confirm("¿Eliminar este faltante de la lista?")) return;
+      faltantes = faltantes.filter(f => f.idFaltante !== idFaltante);
+      localStorage.setItem('surtifacil_faltantes', JSON.stringify(faltantes));
+      renderFaltantesResumen();
+      if(modoActual === 'calle') renderModoCalle();
+    }
+
+    function renderFaltantesResumen() {
+      const cont = document.getElementById('lista-faltantes-resumen');
+      const pendientes = faltantes.filter(f => f.estado === 'pendiente' || f.estado === 'no_conseguido').sort((a,b) => a.nombre.localeCompare(b.nombre));
+      
+      if(pendientes.length === 0) {
+        cont.innerHTML = "<p style='color:#64748b; font-size:0.9rem; margin-top:8px;'>No hay faltantes marcados hoy.</p>";
+        return;
+      }
+
+      cont.innerHTML = pendientes.map(f => `
+        <div style="padding:6px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div style="flex:1; min-width:0;">
+            <strong>${f.nombre}</strong> ${f.color ? `<span style="color:#2563eb;">(${f.color})</span>` : ''}<br>
+            ${f.provActual === SIN_PROVEEDOR_KEY ? '<span class="badge-no-prov">⚠️ SIN PROVEEDOR</span>' : `<small style="color:${f.estado === 'no_conseguido' ? '#dc2626' : '#64748b'}; font-weight:${f.estado === 'no_conseguido' ? 'bold' : 'normal'};">${f.estado === 'no_conseguido' ? '❌ No conseguido' : '📍 ' + f.provActual}</small>`}
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="background:#e0e7ff; color:#3730a3; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:0.85rem;">Cant: ${f.cantidad}</span>
+            <button class="btn btn-red btn-sm" onclick="eliminarFaltanteResumen('${f.idFaltante}')" title="Eliminar">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderModoCalle() {
+      const contenedorNotas = document.getElementById('contenedor-notas-calle');
+      if(notasGenerales && notasGenerales.trim() !== "") {
+        contenedorNotas.innerHTML = `<div class="banner-notas-calle"><strong>📌 Notas / Recordatorios Generales:</strong><br>${notasGenerales}</div>`;
+        contenedorNotas.style.display = 'block';
+      } else {
+        contenedorNotas.innerHTML = "";
+        contenedorNotas.style.display = 'none';
+      }
+
+      const tabs = document.getElementById('tabs-proveedores');
+      const provsOrdenados = [...proveedores].sort((a,b) => a.localeCompare(b));
+      
+      let htmlTabs = `
+        <div class="tab-mobile tab-red ${provCalleActual === SIN_PROVEEDOR_KEY ? 'active' : ''}" onclick="cambiarTabProveedor('${SIN_PROVEEDOR_KEY.replace(/'/g, "\\'")}')">
+          ⚠️ Sin Prov (${faltantes.filter(f => f.provActual === SIN_PROVEEDOR_KEY && f.estado === 'pendiente').length})
+        </div>
+      `;
+      
+      htmlTabs += provsOrdenados.map(p => {
+        const isActive = p === provCalleActual ? 'active' : '';
+        const pEscaped = p.replace(/'/g, "\\'");
+        return `<div class="tab-mobile ${isActive}" onclick="cambiarTabProveedor('${pEscaped}')">${p}</div>`;
+      }).join('');
+
+      htmlTabs += `
+        <div class="tab-mobile tab-red ${provCalleActual === 'NO_CONSEGUIDO' ? 'active' : ''}" onclick="cambiarTabProveedor('NO_CONSEGUIDO')">
+          ❌ No conseguidos (${faltantes.filter(f => f.estado === 'no_conseguido').length})
+        </div>
+      `;
+      
+      tabs.innerHTML = htmlTabs;
+      const cont = document.getElementById('lista-compras-proveedor');
+
+      if(provCalleActual === 'NO_CONSEGUIDO') {
+        const noConseguidos = faltantes.filter(f => f.estado === 'no_conseguido').sort((a,b) => a.nombre.localeCompare(b.nombre));
+        if(noConseguidos.length === 0) {
+          cont.innerHTML = `<p style="padding:20px; color:#64748b; text-align:center;">No hay productos agotados pendientes.</p>`;
+          return;
+        }
+        cont.innerHTML = noConseguidos.map(item => `
+          <div class="calle-prod-card">
+            <div style="flex:1; min-width:0;">
+              <div class="prod-name">${item.nombre} <span style="background:#e0e7ff; color:#3730a3; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Cant: ${item.cantidad}</span></div>
+              ${item.color ? `<div style="color:#2563eb; font-weight:bold; font-size:0.85rem;">Var: ${item.color}</div>` : ''}
+              <div style="font-size:0.75rem; color:#dc2626; font-weight:bold; margin-top:2px;">Original: ${item.provOriginal}</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-green btn-sm" onclick="reactivarProducto('${item.idFaltante}')" title="Reactivar">🔄</button>
+              <button class="btn btn-secondary btn-sm" onclick="abrirAccionCalle('${item.idFaltante}')">Opciones ➔</button>
+            </div>
+          </div>
+        `).join('');
+        return;
+      }
+
+      const items = faltantes.filter(f => f.provActual.trim() === provCalleActual.trim() && f.estado === 'pendiente').sort((a,b) => a.nombre.localeCompare(b.nombre));
+      
+      if(items.length === 0) {
+        cont.innerHTML = `<p style="padding:25px; color:#64748b; text-align:center; font-size:0.9rem;">No hay compras pendientes con este proveedor.</p>`;
+        return;
+      }
+      
+      cont.innerHTML = items.map(item => `
+        <div class="calle-prod-card">
+          <div style="flex:1; min-width:0;">
+            <div class="prod-name">${item.nombre} <span style="background:#e0e7ff; color:#3730a3; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Cant: ${item.cantidad}</span></div>
+            ${item.color ? `<div style="color:#2563eb; font-weight:bold; font-size:0.85rem;">Var: ${item.color}</div>` : ''}
+            ${item.provActual === SIN_PROVEEDOR_KEY ? '<div class="badge-no-prov">⚠️ ASIGNAR PROVEEDOR</div>' : ''}
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="abrirAccionCalle('${item.idFaltante}')">Opciones ➔</button>
+        </div>
+      `).join('');
+    }
+
+    function cambiarTabProveedor(prov) { 
+      provCalleActual = prov; 
+      renderModoCalle(); 
+    }
+
+    function abrirAccionCalle(idFaltante) {
+      prodSeleccionadoTemp = faltantes.find(f => f.idFaltante === idFaltante);
+      if(!prodSeleccionadoTemp) return;
+      document.getElementById('calle-prod-nombre').innerText = prodSeleccionadoTemp.nombre + (prodSeleccionadoTemp.color ? ` (${prodSeleccionadoTemp.color})` : '') + ` [Comprar: ${prodSeleccionadoTemp.cantidad}]`;
+      document.getElementById('modal-accion-calle').style.display = 'flex';
+    }
+
+    function cerrarModalCalle() { document.getElementById('modal-accion-calle').style.display = 'none'; }
+
+    function confirmarCompra() {
+      if(!prodSeleccionadoTemp) return;
+      prodSeleccionadoTemp.estado = 'comprado';
+      localStorage.setItem('surtifacil_faltantes', JSON.stringify(faltantes));
+      cerrarModalCalle();
+      renderModoCalle();
+    }
+
+    function confirmarNoConseguido() {
+      if(!prodSeleccionadoTemp) return;
+      prodSeleccionadoTemp.estado = 'no_conseguido';
+      localStorage.setItem('surtifacil_faltantes', JSON.stringify(faltantes));
+      cerrarModalCalle();
+      renderModoCalle();
+    }
+
+    function reactivarProducto(idFaltante) {
+      const item = faltantes.find(f => f.idFaltante === idFaltante);
+      if(item) {
+        item.estado = 'pendiente';
+        item.provActual = item.provOriginal;
+        localStorage.setItem('surtifacil_faltantes', JSON.stringify(faltantes));
+        renderModoCalle();
+      }
+    }
+
+    function abrirReasignacion() {
+      cerrarModalCalle();
+      if(!prodSeleccionadoTemp) return;
+      const provsOrdenados = [...proveedores].sort((a,b) => a.localeCompare(b));
+      const cont = document.getElementById('lista-proveedores-reasignar');
+      cont.innerHTML = provsOrdenados.filter(p => p !== prodSeleccionadoTemp.provActual).map(p => {
+        const pEscaped = p.replace(/'/g, "\\'");
+        return `<button class="btn" style="width:100%; text-align:left;" onclick="reasignarA('${pEscaped}')">📍 ${p}</button>`;
+      }).join('');
+      document.getElementById('modal-reasignar').style.display = 'flex';
+    }
+
+    function reasignarA(nuevoProv) {
+      if(!prodSeleccionadoTemp) return;
+      prodSeleccionadoTemp.provActual = nuevoProv;
+      localStorage.setItem('surtifacil_faltantes', JSON.stringify(faltantes));
+      const prodOriginal = catalogo.find(p => p.id === prodSeleccionadoTemp.idProductoOriginal);
+      if(prodOriginal && prodOriginal.prov === SIN_PROVEEDOR_KEY) {
+        prodOriginal.prov = nuevoProv;
+        localStorage.setItem('surtifacil_catalogo', JSON.stringify(catalogo));
+      }
+      cerrarModalReasignar();
+      renderCatalogo();
+      renderModoCalle();
+    }
+
+    function cerrarModalReasignar() { document.getElementById('modal-reasignar').style.display = 'none'; prodSeleccionadoTemp = null; }
+    function abrirModalProveedores() { renderListaGestionProveedores(); document.getElementById('modal-proveedores').style.display = 'flex'; }
+    function cerrarModalProveedores() { document.getElementById('modal-proveedores').style.display = 'none'; }
+
+    function renderListaGestionProveedores() {
+      const cont = document.getElementById('lista-gestion-proveedores');
+      const provsOrdenados = [...proveedores].sort((a,b) => a.localeCompare(b));
+      cont.innerHTML = provsOrdenados.map(p => {
+        const indexReal = proveedores.indexOf(p);
+        return `
+          <div class="prov-list-item">
+            <span>📍 <strong>${p}</strong></span>
+            <div>
+              <button class="btn btn-secondary btn-sm" onclick="renombrarProveedor(${indexReal})">✏️</button>
+              <button class="btn btn-red btn-sm" onclick="eliminarProveedor(${indexReal})">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function agregarProveedorDirecto() {
+      const input = document.getElementById('input-nuevo-prov');
+      const nombre = input.value.trim();
+      if(!nombre) { alert("Escribe un nombre."); return; }
+      if(proveedores.includes(nombre)) { alert("Ya existe."); return; }
+      proveedores.push(nombre);
+      proveedores.sort((a,b) => a.localeCompare(b));
+      localStorage.setItem('surtifacil_provs', JSON.stringify(proveedores));
+      input.value = "";
+      renderListaGestionProveedores();
+      poblarSelectProveedores();
+      if(modoActual === 'calle') renderModoCalle();
+    }
+
+    function renombrarProveedor(index) {
+      const actual = proveedores[index];
+      const nuevo = prompt("Nuevo nombre:", actual);
+      if(nuevo && nuevo.trim() !== "" && nuevo !== actual) {
+        const nombreLimpio = nuevo.trim();
+        proveedores[index] = nombreLimpio;
+        proveedores.sort((a,b) => a.localeCompare(b));
+        localStorage.setItem('surtifacil_provs', JSON.stringify(proveedores));
+        if(provCalleActual === actual) provCalleActual = nombreLimpio;
+        renderListaGestionProveedores();
+        poblarSelectProveedores();
+        renderCatalogo();
+        if(modoActual === 'calle') renderModoCalle();
+      }
+    }
+
+    function eliminarProveedor(index) {
+      const nombre = proveedores[index];
+      if(confirm(`¿Eliminar proveedor "${nombre}"?`)) {
+        proveedores.splice(index, 1);
+        localStorage.setItem('surtifacil_provs', JSON.stringify(proveedores));
+        renderListaGestionProveedores();
+        poblarSelectProveedores();
+        if(provCalleActual === nombre) provCalleActual = SIN_PROVEEDOR_KEY;
+        if(modoActual === 'calle') renderModoCalle();
+      }
+    }
+
+    function poblarSelectProveedores() {
+      const selectNuevo = document.getElementById('nuevo-prov');
+      const selectEdit = document.getElementById('edit-prod-prov');
+      const provsOrdenados = [...proveedores].sort((a,b) => a.localeCompare(b));
+      let options = `<option value="${SIN_PROVEEDOR_KEY}">⚠️ SIN PROVEEDOR (Buscar en el Centro)</option>`;
+      options += provsOrdenados.map(p => `<option value="${p}">${p}</option>`).join('');
+      if(selectNuevo) selectNuevo.innerHTML = options;
+      if(selectEdit) selectEdit.innerHTML = options;
+    }
+
+    function abrirModalCategorias() { renderListaGestionCategorias(); document.getElementById('modal-categorias').style.display = 'flex'; }
+    function cerrarModalCategorias() { document.getElementById('modal-categorias').style.display = 'none'; }
+
+    function renderListaGestionCategorias() {
+      const cont = document.getElementById('lista-gestion-categorias');
+      const catsOrdenadas = [...categorias].sort((a,b) => a.localeCompare(b));
+      cont.innerHTML = catsOrdenadas.map(c => {
+        const indexReal = categorias.indexOf(c);
+        return `
+          <div class="prov-list-item">
+            <span>🏷️ <strong>${c}</strong></span>
+            <div>
+              <button class="btn btn-secondary btn-sm" onclick="renombrarCategoria(${indexReal})">✏️</button>
+              ${c !== 'General' ? `<button class="btn btn-red btn-sm" onclick="eliminarCategoria(${indexReal})">🗑️</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function agregarCategoriaDirecto() {
+      const input = document.getElementById('input-nueva-cat');
+      const nombre = input.value.trim();
+      if(!nombre) { alert("Escribe un nombre."); return; }
+      if(categorias.includes(nombre)) { alert("Ya existe."); return; }
+      categorias.push(nombre);
+      categorias.sort((a,b) => a.localeCompare(b));
+      localStorage.setItem('surtifacil_cats', JSON.stringify(categorias));
+      input.value = "";
+      renderListaGestionCategorias();
+      poblarSelectsCategorias();
+      renderCatalogo();
+    }
+
+    function renombrarCategoria(index) {
+      const actual = categorias[index];
+      const nuevo = prompt("Nuevo nombre:", actual);
+      if(nuevo && nuevo.trim() !== "" && nuevo !== actual) {
+        const nombreLimpio = nuevo.trim();
+        categorias[index] = nombreLimpio;
+        categorias.sort((a,b) => a.localeCompare(b));
+        localStorage.setItem('surtifacil_cats', JSON.stringify(categorias));
+        renderListaGestionCategorias();
+        poblarSelectsCategorias();
+        renderCatalogo();
+      }
+    }
+
+    function eliminarCategoria(index) {
+      const nombre = categorias[index];
+      if(confirm(`¿Eliminar categoría "${nombre}"?`)) {
+        categorias.splice(index, 1);
+        localStorage.setItem('surtifacil_cats', JSON.stringify(categorias));
+        renderListaGestionCategorias();
+        poblarSelectsCategorias();
+        renderCatalogo();
+      }
+    }
+
+    function poblarSelectsCategorias() {
+      const selectFiltro = document.getElementById('select-filtro-cat');
+      const selectNuevo = document.getElementById('nuevo-cat');
+      const selectEdit = document.getElementById('edit-prod-cat');
+      const catsOrdenadas = [...categorias].sort((a,b) => a.localeCompare(b));
+      let optionsFiltro = `<option value="">Todas</option>`;
+      let optionsBase = catsOrdenadas.map(c => `<option value="${c}">${c}</option>`).join('');
+      if(selectFiltro) selectFiltro.innerHTML = optionsFiltro + optionsBase;
+      if(selectNuevo) selectNuevo.innerHTML = optionsBase;
+      if(selectEdit) selectEdit.innerHTML = optionsBase;
+    }
+
+    function abrirModalEditarProducto(id) {
+      prodEditingTemp = catalogo.find(p => p.id === id);
+      if(!prodEditingTemp) return;
+      document.getElementById('edit-prod-nombre').value = prodEditingTemp.nombre;
+      document.getElementById('edit-prod-cat').value = prodEditingTemp.cat || "General";
+      document.getElementById('edit-prod-prov').value = prodEditingTemp.prov;
+      const tieneColor = prodEditingTemp.tieneColor || false;
+      document.getElementById('edit-prod-has-color').checked = tieneColor;
+      document.getElementById('edit-prod-colores').value = prodEditingTemp.colores ? prodEditingTemp.colores.join(', ') : '';
+      toggleEditColorInput(tieneColor);
+      document.getElementById('modal-editar-producto').style.display = 'flex';
+    }
+
+    function cerrarModalEditarProducto() { document.getElementById('modal-editar-producto').style.display = 'none'; prodEditingTemp = null; }
+    function toggleEditColorInput(checked) { document.getElementById('edit-group-colores').style.display = checked ? 'block' : 'none'; }
+
+    function guardarEdicionProducto() {
+      if(!prodEditingTemp) return;
+      const nuevoNombre = document.getElementById('edit-prod-nombre').value.trim();
+      if(!nuevoNombre) { alert("Escribe un nombre."); return; }
+      const tieneColor = document.getElementById('edit-prod-has-color').checked;
+      const colores = tieneColor ? document.getElementById('edit-prod-colores').value.split(',').map(c => c.trim()).filter(c => c !== "") : [];
+      prodEditingTemp.nombre = nuevoNombre;
+      prodEditingTemp.cat = document.getElementById('edit-prod-cat').value;
+      prodEditingTemp.prov = document.getElementById('edit-prod-prov').value;
+      prodEditingTemp.tieneColor = tieneColor;
+      prodEditingTemp.colores = colores;
+      catalogo.sort((a,b) => a.nombre.localeCompare(b.nombre));
+      localStorage.setItem('surtifacil_catalogo', JSON.stringify(catalogo));
+      cerrarModalEditarProducto();
+      renderCatalogo();
+    }
+
+    function abrirModalNuevoProducto() { poblarSelectsCategorias(); poblarSelectProveedores(); document.getElementById('modal-nuevo-producto').style.display = 'flex'; }
+    function cerrarModalNuevoProducto() { document.getElementById('modal-nuevo-producto').style.display = 'none'; }
+    function toggleColorInput(checked) { document.getElementById('group-colores').style.display = checked ? 'block' : 'none'; }
+
+    function guardarNuevoProducto() {
+      const nombre = document.getElementById('nuevo-nombre').value.trim();
+      const cat = document.getElementById('nuevo-cat').value;
+      const prov = document.getElementById('nuevo-prov').value;
+      const tieneColor = document.getElementById('nuevo-has-color').checked;
+      const colores = tieneColor ? document.getElementById('nuevo-colores').value.split(',').map(c => c.trim()).filter(c => c !== "") : [];
+      if(!nombre) { alert("Escribe el nombre del producto."); return; }
+      const nuevoObj = { id: Date.now(), nombre: nombre, cat: cat || "General", prov: prov, tieneColor: tieneColor, colores: colores };
+      catalogo.push(nuevoObj);
+      catalogo.sort((a,b) => a.nombre.localeCompare(b.nombre));
+      localStorage.setItem('surtifacil_catalogo', JSON.stringify(catalogo));
+      renderCatalogo();
+      cerrarModalNuevoProducto();
+      document.getElementById('nuevo-nombre').value = "";
+      document.getElementById('nuevo-has-color').checked = false;
+      toggleColorInput(false);
+    }
+
+    init();
+  </script>
+</body>
+</html>
